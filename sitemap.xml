@@ -3,6 +3,21 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>https://imvido.com/blog/</loc>
+    <lastmod>2019-09-08T14:08:32+07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imvido.com/blog/2019-09/clustered-index/</loc>
+    <lastmod>2019-09-08T14:08:32+07:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>https://imvido.com/</loc>
+    <lastmod>2019-09-08T14:08:32+07:00</lastmod>
+  </url>
+  
+  <url>
     <loc>https://imvido.com/categories/</loc>
   </url>
   
@@ -12,10 +27,6 @@
   
   <url>
     <loc>https://imvido.com/tags/</loc>
-  </url>
-  
-  <url>
-    <loc>https://imvido.com/</loc>
   </url>
   
 </urlset>

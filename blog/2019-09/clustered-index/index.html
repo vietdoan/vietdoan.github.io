@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="zh-cmn-Hans">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=1" />
+  <meta name="author" content="Vido">
+  <meta name="description" content="Clustered Index là gì và tại sao nó có thể tăng tốc độ đọc bản ghi trong cơ sở dữ liệu quan hệ cũng như trade-off mà bạn nên biết">
+  
+  <meta property="og:title" content="Clustered Index" />
+<meta property="og:description" content="Clustered Index là gì và tại sao nó có thể tăng tốc độ đọc bản ghi trong cơ sở dữ liệu quan hệ cũng như trade-off mà bạn nên biết" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://imvido.com/blog/2019-09/clustered-index/" />
+<meta property="article:published_time" content="2019-09-08T14:08:32+07:00" />
+<meta property="article:modified_time" content="2019-09-08T14:08:32+07:00" />
+
+
+  <title>
+  
+       Clustered Index | Vido Blog 
+  
+  </title>
+
+  <link rel="canonical" href="https://imvido.com/blog/2019-09/clustered-index/">
+
+  
+  
+
+  
+  <link href="https://imvido.com/css/vendors-extensions/fontawesome/all.min.css" rel="stylesheet">
+
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Ubuntu+Mono:400,400i,700,700i|Raleway:300,400,500,600">
+  <link href="https://imvido.com/css/font.css" rel="stylesheet"> 
+    
+  
+  <link href="https://imvido.com/css/vendors/bootstrap4/bootstrap.min.css" rel="stylesheet">
+  <link href="https://imvido.com/css/vendors-extensions/mdb/mdb.min.css" rel="stylesheet"> 
+  <link href="https://imvido.com/css/vendors/mdb/style.min.css" rel="stylesheet"> 
+  <link href="https://imvido.com/css/main.css" rel="stylesheet">
+
+
+  
+  <link rel="shortcut icon"
+  
+      href="https://res.cloudinary.com/vido/image/upload/v1567358559/images/profile_kpasju.jpg"
+  
+  >
+
+
+  
+  
+
+  <style type="text/css">
+      @media (min-width: 800px) and (max-width: 850px) {
+              .navbar:not(.top-nav-collapse) {
+                  background: #1C2331!important;
+              }
+          }
+  </style>
+
+
+  
+    
+    <link rel="stylesheet" href="https://imvido.com/js/vendors/katex/katex.min.css">
+  
+  
+
+  
+    
+    <link rel="stylesheet" href="https://imvido.com/css/vendors/highlight/github-gist.css">
+  
+
+</head>
+
+  <body class="bg-light" data-spy="scroll" data-target="#page-scrollspy" data-offset="90">
+  
+    
+    
+
+    
+      
+
+
+<nav class="navbar fixed-top navbar-expand-lg navbar-dark scrolling-navbar">
+    <div class="container">
+
+      
+      <a class="navbar-brand" href="https://imvido.com">
+          
+        <img class="avatar" src="https://imvido.com" style="width: 40px!important;height: auto;"  class="d-inline-block align-top" alt="" >
+        
+        <strong> Vido</strong>
+      </a>
+
+      
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+        aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+
+        
+        <ul class="navbar-nav mr-auto ">
+          <li class="nav-item ">
+            <a class="nav-link" href="https://imvido.com">Home</a>
+          </li>
+             
+            <li class="nav-item ">
+              <a class="nav-link" href="https://imvido.com/blog/" >Blog  </a>
+            </li>
+          
+             
+            <li class="nav-item ">
+              <a class="nav-link" href="https://imvido.com/moment/" >Moment  </a>
+            </li>
+          
+             
+            <li class="nav-item ">
+              <a class="nav-link" href="https://imvido.com/about/" >About  </a>
+            </li>
+          
+          
+        </ul>
+
+      </div>
+
+    </div>
+  </nav>
+  
+ 
+      
+ 
+
+
+
+
+
+
+<div id="site-header" class="carousel slide carousel-fade" data-ride="carousel" style="height: 18rem;" >  
+
+  
+  
+  
+
+  
+  <div class="carousel-inner" role="listbox">
+    
+      
+
+        
+        <div class="carousel-item active">
+          <div class="view" style="background-image: url('https://imvido.com/header-slides/markus-spiske-QJssnBZfqmQ-unsplash.jpg'); background-repeat: no-repeat; background-size: cover;">
+
+            
+            <div class="mask rgba-black-light d-flex justify-content-center align-items-center">
+
+              
+              
+              
+
+            </div>
+            
+
+          </div>
+        </div>
+        
+      
+    
+      
+
+        
+        <div class="carousel-item">
+          <div class="view" style="background-image: url('https://imvido.com/header-slides//max-nelson-Y9w872CNIyI-unsplash.jpg'); background-repeat: no-repeat; background-size: cover;">
+
+            
+            <div class="mask rgba-black-light d-flex justify-content-center align-items-center">
+
+            
+
+            </div>
+            
+
+          </div>
+        </div>
+        
+      
+    
+
+  
+  </div>
+  
+
+  
+  <div class="carousel-content text-center white-text wow fadeIn">
+    <div class="row mx-0 headfont mt-3 pt-4">
+      
+      <div class="col-12 col-sm-5 align-middle">
+        <a href="https://imvido.com">
+          
+            <img class="pull-right avatar avatar-md" src="https://res.cloudinary.com/vido/image/upload/v1567358559/images/profile_kpasju.jpg" alt="" >
+          
+        </a>
+      </div>
+      
+      <div class="col-12 col-sm-7 text-left pl-2">
+        <a href="https://imvido.com">
+          <h1 class="mb-2 h1" style="font-weight: 300;" >
+            <strong>Vido Blog</strong>
+          </h1>
+        </a>
+        
+
+             
+        <div class="mt-2" style="font-size: 1rem; color: white;">
+            
+              <a href="//github.com/vietdoan" target="_blank" rel="noopener"><i class="fab fa-github pr-1" aria-hidden="true"></i></a>    
+            
+            
+              <a href="//linkedin.com/in/van-viet-doan-171017b5/" target="_blank" rel="noopener"><i class="fab fa-linkedin pr-1" aria-hidden="true"></i></a>
+            
+
+            
+              <a href="//facebook.com/vietdoan.hp" target="_blank" rel="noopener"><i class="fab fa-facebook pr-1" aria-hidden="true"></i></a>
+            
+
+            
+
+            
+
+            
+    
+            
+    
+        
+            
+                <a href="mailto:vietdoanhp1996@email.com"><i class="far fa-envelope-open pr-1" aria-hidden="true"></i></a>
+            
+    
+            
+
+            
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  
+  
+  
+
+</div>
+  
+    
+
+    
+  
+  <main class="post-main-wrapper">
+    
+    
+    <div class="row">
+
+      
+
+      
+      <div class="container pr-5">
+      
+
+        
+        <div class="z-depth-1  post-wrapper white-bg single-post">
+
+          <div class="post-header text-center" >
+  <ul class="post-meta li-x">
+    
+    
+  </ul>
+
+  <div class="px-4 post-heading">Clustered Index</div>
+
+  <ul class="post-meta li-x mt-1">
+    
+      <li>Sep 8, 2019</li>
+    
+
+    
+      <li class="middot"></li>
+      <li>8 minutes read</li>
+    
+  </ul>
+  
+
+</div>
+
+
+          <div class="post-content markdown">
+            
+
+<h2 id="những-điều-cần-biết">Những điều cần biết</h2>
+
+<p>Nếu bạn có một chút kinh nghiệm về lập trình, hiểu được một số khái niệm cơ bản của cơ sở dữ liệu quan hệ (relational database) và SQL (như là index, primary key) thì sẽ dễ đọc hơn.</p>
+
+<h2 id="giới-thiệu">Giới thiệu</h2>
+
+<p>Trong bài viết này tôi sẽ trình bày hiểu biết của bản thân về clustered index và tại sao nó có thể giúp bạn cải thiện được tốc độ truy vấn dữ liệu khi  sử dụng các  hệ thống  quản lý cơ sở dữ liệu quan hệ  (Relational database  management system). Bài viết bao gồm:
+- Ý tưởng chung của clustered index và secondary index.
+- Clustered Index trong MySQL.</p>
+
+<h2 id="clustered-index">Clustered Index</h2>
+
+<h3 id="b-tree">B-Tree</h3>
+
+<p>Index là một phần tối quan trọng của một cơ sở dữ liệu vì nó giúp tăng tốc việc truy vấn thông tin. Để duy trì index của một bảng, người ta thường sử dụng các cấu trúc dữ liệu như hash, B-Tree, LSM-Tree,&hellip; Nhưng khi ai đó nói với bạn là bảng của họ có sử dụng clustered index thì nhiều khả năng cấu trúc dữ liệu họ đang sử dụng để lưu index cho bảng là B-Tree. Có thể hiểu B-tree là một cấu trúc dữ liệu dạng cây mà nút lá sẽ lưu thông tin về một bản ghi trong bảng (row / record) và các nút còn lại (internal node) sẽ lưu các index key và các con trỏ đến nút con của nó. B-Tree đánh đổi không gian dữ liệu (một thứ rất rẻ ở thời điểm hiện tại) và độ phức tạp của việc ghi để tăng tốc độ đọc.
+<img src="https://res.cloudinary.com/vido/image/upload/v1567940701/images/clustered-index/Screenshot_from_2019-09-08_15-14-52_b2vt52.png" alt="" />
+Ví dụ về một bảng lưu thông tin của user, dùng B-Tree để đánh index trên cột <code>user_id</code>. Hình trên  mô tả cách storage engine tìm được bản ghi chứa thông tin của user với <code>user_id</code> là <code>251</code>.  Có thể thấy là mỗi internal node lưu thông tin về các khoảng <code>user_id</code> và ở mỗi node việc của storage engine là tìm xem khoảng nào chứa giá trị <code>user_id</code> truy vấn và cứ thế tìm ra &ldquo;đường đi&rdquo; đến nút lá. Nút lá sẽ chứa key mà bạn đang tìm (đương nhiên rồi) và tham chiếu (reference) đến nơi lưu bản ghi hoặc chính bản ghi.</p>
+
+<p>Một điều mà bạn cần lưu ý là các node trong key nằm gọn trong 1 page . Có thể hiểu đơn giản page là đơn vị bé nhất để lưu trữ data trong bộ nhớ và đọc dữ liệu từ 1 page là nhanh nhất. Tưởng tượng page là 1 trang sách (get it 😆), data mà bạn cần tìm là đoạn văn nằm trong trang sách đó và 2 đoạn văn trên và dưới có thể nói về 2 vấn đề hoàn toàn khác nhau, thậm chí các đoạn văn liên quan đến nhau còn nằm không theo thứ tự và rải rác ở rất nhiều trang (thế giới OS nó là vậy đó, chấp nhận đi). Thời gian bạn đọc hết nội dung trong trang đó sẽ ngắn hơn là thời gian bạn đi tìm một trang nào đó trong mục lục rồi lần mò đến trang đó và đọc. Bằng cách lưu hết thông tin trong 1 page, việc tìm kiếm trong B-Tree trở lên nhanh hơn rất nhiều.</p>
+
+<p>Hành trình tìm dữ liệu của bạn thực ra là nhảy từ page này sang page khác, ở mỗi page chỉ cần bạn biết địa chỉ là gì (<code>user_id</code>) thì bạn sẽ biết phải đi theo đường nào (reference).</p>
+
+<p>Độ phức tạp của B-Tree là O(log N) cho ghi và đọc. Tồn tại qua gần nửa thế kỉ, nó vẫn đang là cấu trúc dữ liệu phổ biến nhất dùng cho cả cơ sở dữ liệu quan hệ và phi quan hệ.</p>
+
+<h3 id="clustered-index-1">Clustered Index</h3>
+
+<p>Như đã nói thì nút lá có thể lưu tham chiếu đến nơi lưu trữ bản ghi (gọi là heap file) hoặc là lưu luôn bản ghi. Cả 2 phương pháp đều có mặt lợi và hại, nếu phương pháp thứ nhất tránh việc data bị lặp lại (duplicate) ở nhiều nơi trong disk qua đó tích kiệm không gian lưu trữ thì phương pháp thứ 2 sẽ tăng tốc độ đọc (như tôi đã nói thì việc đọc thông tin trong 1 page là nhanh nhất và thời gian tìm đúng page để đọc là rất dài).
+Nếu storage engine của hệ thống cơ sở dữ liệu bạn đang dùng chọn phương pháp thứ 2 cho B-Tree thì đó là <strong>clustered index</strong>. Việc lưu luôn bản ghi cùng với key khiến các bản ghi có key gần nhau thường được lưu gần nhau (gần ở đây là trong cùng 1 page luôn), đó là lí do có từ clustered. Mục đích là để tăng tốc độ tìm và đọc bản ghi.</p>
+
+<p>Mỗi một bảng sẽ chỉ có một clustered index vì nếu không mỗi lần update một bản ghi, storage engine sẽ phải tìm và update ở nhiều nơi khác nhau. Vậy nên các index khác sẽ không lưu bản ghi ở nút lá mà thay vì đó sẽ lưu tham chiếu tới bản ghi hoặc là lưu giá trị của column được đánh clustered index. Một lần nữa, quyết định chọn giải pháp nào là tùy thuộc vào từng storage engine, nhưng ta đều gọi chung các index đó là <strong>secondary index</strong>.
+<img src="https://res.cloudinary.com/vido/image/upload/v1567941148/images/clustered-index/Screenshot_from_2019-09-08_18-11-50_qniblb.png" alt="" /></p>
+
+<p>Khi sử dụng clustered index thì không nên xét giá trị của cột tương ứng là các giá trị random (như UUID chẳng hạn) vì nó sẽ ảnh hưởng rất nhiều đến tốc độ ghi, thay vào đó nên set attribute AUTO_INCREMENT cho cột đó. Lí do là vì khi bạn insert bản ghi tuần tự từ trái sang phải (do key có giá trị tăng dần) các bản ghi và key được ghi vào từng page, đầy page này thì sang page khác như hình dưới
+<img src="https://res.cloudinary.com/vido/image/upload/v1567953475/images/clustered-index/Screenshot_from_2019-09-08_21-37-18_mj5cxc.png" alt="" />
+Còn nếu giá trị key đó là ngẫu nhiên, thì khi thêm một bản ghi có thể bạn sẽ phải ghi nó vào một page vốn đã đầy. Lúc này storage engine phải tách page cũ, kiếm một page mới và copy nửa bên phải sang page mới rồi mới ghi bản ghi mới vào page cũ. Những thao tác đó tốn rất nhiều thao tác I/O. Không những tốn thời gian, nó còn dẫn đến tình trạng phân mảnh nội (internal fragmentation), nhớ về ví dụ trang giấy ở trên, giống như là không viết hết tất cả các dòng của trang sách, mỗi trang chỉ ghi được một số dòng rồi để thừa dẫn đến &hellip; lãng phí. Kích thước của cây index sẽ phình ra (giống như là quyển sách bị độn dày thêm).</p>
+
+<p>Dưới đây là benchmark khi chèn thêm bản ghi vào bảng (dùng InnoDB của MySQL) khi xài key tăng dần và UUID. Có thể thấy rõ là bảng càng nhiều bản ghi thì thời gian ghi mới càng lâu và kích thước cây càng lớn.
+<img src="https://res.cloudinary.com/vido/image/upload/v1567954291/images/clustered-index/Screenshot_from_2019-09-08_21-51-07_bhdnmy.png" alt="" /></p>
+
+<h3 id="clustered-index-trong-mysql">Clustered Index trong MySQL</h3>
+
+<p>Với MySQL, bạn cần dùng storage engine InnoDB để có thể dùng clustered index. InnoDB sẽ đánh clustered index trên primary key và trong trường hợp bạn không define primary key thì nó sẽ thử sử dụng một unique nonnullable key. Nếu vẫn không tìm được thì nó sẽ tiếp tục khai báo một primary key ẩn (chính là ID) và đánh clustered index trên key này.
+Secondary Index của InnoDB sẽ lưu key cùng với primary key ở nút lá. Vì vậy nếu query của bạn hit secondary index thì bạn sẽ tốn 2 lần đi trên cây B-Tree. Một lần cho secondary index để tìm được primary key và lần 2 là lấy dữ liệu từ clustered index. Nhưng nếu bạn select toàn các field trong 1 composite index thì sẽ chỉ tốn 1 lần vì các field đó đều đã được lưu trong nút lá rồi, đây gọi là covering index.
+Nếu bạn dùng storage engine là InnoDB thì mặc định là sẽ có clustered index trên primary key rồi. Vì vậy nếu việc ghi thêm 1 hàng diễn ra khá nhiều thì hãy set primary key là số và để AUTO_INCREMENT hoặc tự đảm bảo là các key ghi vào sẽ có thứ tự từ điển tăng dần. Cá nhân mình thích cách đầu tiên hơn vì nó tích kiệm được rất nhiều công sức, ta chỉ cần ghi data, storage engine sẽ lo hết phần còn lại.</p>
+
+<h2 id="kết-luận">Kết Luận</h2>
+
+<p>Tổng kết lại, thì lợi ích của việc sử dụng clustered index (hoặc vô tình xài, nếu bạn đang dùng InnoDB của MySQL):</p>
+
+<ul>
+<li>Truy cập data nhanh hơn vì bản ghi cần tìm được lưu luôn trong nút lá.</li>
+<li>Truy vấn sử dụng covering index có thể trả về luôn các giá trị lưu ở nút lá.</li>
+<li>Các dữ liệu liên quan đến nhau được lưu thành các cụm gần nhau. Ví du, khi phát triển một ứng dụng như google calender chẳng hạn, bằng việc set primary key tinh tế, bạn có thể truy vấn các sự kiện diễn ra trong 1 khu vực chỉ bằng việc đọc vài page.</li>
+</ul>
+
+<p>Tuy nhiên chúng ta cần nắm được các điểm bất lợi của clustered index:</p>
+
+<ul>
+<li>Tốc độ ghi phụ thuộc vào thứ tự ghi.</li>
+<li>Update clustered index column sẽ tốn rất nhiều disk I/O vì phải di chuyển hoàn toàn các bản ghi được update sang page khác.</li>
+<li>Việc update hoặc chèn thêm bản ghi mới vào sẽ gây ra page split rất nhiều (phải tách page đã đầy bản ghi thành 2 page khác nhau để chèn thêm bản ghi mới). Page split sẽ khiến không gian lưu trữ bị phình ra.</li>
+<li>Truy vấn sử dụng secondary index có thể chậm vì phải lookup index 2 lần.</li>
+</ul>
+
+<h2 id="tài-liệu-tham-khảo">Tài liệu tham khảo</h2>
+
+<ul>
+<li><a href="https://dataintensive.net/">Designing Data-Intensive Applications</a></li>
+<li><a href="https://www.highperfmysql.com/">High Performance MySQL</a></li>
+</ul>
+
+          </div>
+
+          
+          <div class="row">
+            <div class="col-md-8">
+            
+            </div>
+            
+          </div>
+          
+
+          
+          <div class="row pt-3">
+            <div class="col-md-6">
+              
+            </div>
+            
+            <div class="col-md-6 text-right" >
+              
+            </div>
+          </div>
+
+          
+
+        </div>
+        
+
+      </div>
+      
+
+      
+
+    </div>
+    
+
+
+  </main>
+  
+
+
+    
+    
+
+<footer class="page-footer text-center font-small mt-4 wow fadeIn">
+
+
+  
+  <div class="pb-2 mt-5 pt-5">
+    
+      <a href="//github.com/vietdoan " target="_blank" rel="noopener"><i class="fab fa-github mr-3" aria-hidden="true"></i></a>    
+    
+    
+      <a href="//linkedin.com/in/van-viet-doan-171017b5/" target="_blank" rel="noopener"><i class="fab fa-linkedin-in mr-3" aria-hidden="true"></i></a>
+    
+
+    
+      <a href="//facebook.com/vietdoan.hp" target="_blank" rel="noopener"><i class="fab fa-facebook-f mr-3" aria-hidden="true"></i></a>
+    
+
+    
+
+    
+
+    
+
+    
+
+
+    
+        <a href="mailto:vietdoanhp1996@email.com"><i class="far fa-envelope-open mr-3" aria-hidden="true"></i></a>
+    
+
+    
+
+    
+
+  </div>
+  
+
+  
+  <div class="copyright py-4">
+    
+    <span>  2016 - 2019 &copy; | Theme <a href='https://github.com/orianna-zzo/AllinOne' target="_blank">AllinOne</a> by <a href='https://github.com/orianna-zzo' target="_blank">Orianna</a>  </span>
+  </div>
+  
+
+</footer>
+
+
+    
+
+
+
+
+
+
+<script type="text/javascript" src="https://imvido.com/js/vendors/jquery/jquery-3.3.1.min.js"></script>
+<script type="text/javascript" src="https://imvido.com/js/vendors/jquery/jquery.smooth-scroll.min.js"></script>
+
+
+
+<script type="text/javascript" src="https://imvido.com/js/vendors/popper.min.js"></script>
+<script type="text/javascript" src="https://imvido.com/js/vendors/holder.min.js"></script>
+<script type="text/javascript" src="https://imvido.com/js/vendors-extensions/bootstrap4/bootstrap.js" ></script>
+
+<script type="text/javascript" src="https://imvido.com/js/vendors/mdb/mdb.min.js"></script>
+
+<script type="text/javascript" src="https://imvido.com/js/main.js"></script>
+
+
+
+  
+  <script src="https://imvido.com/js/vendors/highlight.pack.js"> </script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+ 
+  <script src="https://imvido.com/js/vendors/katex/katex.min.js"> </script>
+  <script src="https://imvido.com/js/vendors/katex/contrib/auto-render.min.js"></script>
+
+  <script>
+      document.addEventListener("DOMContentLoaded", function () {
+          renderMathInElement(document.body);
+      });
+  </script>
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+  
+  new WOW().init();
+</script>
+
+
+
+
+  </body>
+</html>

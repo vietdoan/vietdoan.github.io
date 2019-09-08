@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Vido Blog</title>
-    <link>https://imvido.com/</link>
-    <description>Recent content on Vido Blog</description>
+    <title>Blogs on Vido Blog</title>
+    <link>https://imvido.com/blog/</link>
+    <description>Recent content in Blogs on Vido Blog</description>
     <generator>Hugo -- gohugo.io</generator>
     <lastBuildDate>Sun, 08 Sep 2019 14:08:32 +0700</lastBuildDate>
     
-	<atom:link href="https://imvido.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="https://imvido.com/blog/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
